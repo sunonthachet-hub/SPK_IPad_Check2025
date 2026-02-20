@@ -1,0 +1,126 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>iPad Check - School Device Loaning System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Sarabun', 'sans-serif'],
+              sarabun: ['Sarabun', 'sans-serif'],
+            },
+            colors: {
+              'spk-yellow': '#FFD700',
+              'spk-blue': '#003366',
+              'spk-gray': '#F0F0F0',
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      .loader {
+          width: 50px;
+          height: 50px;
+          border: 5px solid #f3f3f3;
+          border-top: 5px solid #3498db;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+      }
+
+      @media print {
+          .no-print {
+              display: none !important;
+          }
+          .printable-area {
+              margin: 0;
+              padding: 0;
+              box-shadow: none !important;
+              border: none !important;
+          }
+          body {
+              background-color: white !important;
+              padding: 1rem;
+          }
+          .printable-area table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+          }
+          .printable-area th, .printable-area td {
+            border: 1px solid #dee2e6;
+            padding: 0.75rem;
+            text-align: left;
+            font-size: 10pt;
+          }
+          .printable-area th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+          }
+          .printable-area h2, .printable-area h3 {
+            page-break-after: avoid;
+          }
+      }
+
+      @keyframes fade-in-right {
+          from { opacity: 0; transform: translateX(100%); }
+          to { opacity: 1; transform: translateX(0); }
+      }
+      .animate-fade-in-right {
+          animation: fade-in-right 0.5s ease-out forwards;
+      }
+
+      @keyframes shake-animation {
+          0% { transform: translate(1px, 1px) rotate(0deg); }
+          10% { transform: translate(-1px, -2px) rotate(-1deg); }
+          20% { transform: translate(-3px, 0px) rotate(1deg); }
+          30% { transform: translate(3px, 2px) rotate(0deg); }
+          40% { transform: translate(1px, -1px) rotate(1deg); }
+          50% { transform: translate(-1px, 2px) rotate(-1deg); }
+          60% { transform: translate(-3px, 1px) rotate(0deg); }
+          70% { transform: translate(3px, 1px) rotate(-1deg); }
+          80% { transform: translate(-1px, -1px) rotate(1deg); }
+          90% { transform: translate(1px, 2px) rotate(0deg); }
+          100% { transform: translate(1px, -2px) rotate(-1deg); }
+      }
+      .animate-shake {
+          animation: shake-animation 0.5s;
+          animation-iteration-count: 1;
+      }
+
+      .ease-out-cubic {
+          transition-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@18.2.0/",
+    "react": "https://esm.sh/react@18.2.0",
+    "react-dom/": "https://esm.sh/react-dom@18.2.0/",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

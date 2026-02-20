@@ -32,7 +32,6 @@ import SelectProfilePictureModal from './components/modals/SelectProfilePictureM
 import UserManagementPage from './components/admin/UserManagementPage';
 import ReportsPage from './components/admin/ReportsPage';
 import ProductManagementPage from './components/admin/ProductManagementPage';
-import ProductApprovalPage from './components/admin/ProductApprovalPage';
 import VisitorPage from './components/visitor/VisitorPage';
 
 const App: React.FC = () => {
@@ -204,6 +203,11 @@ const App: React.FC = () => {
     useEffect(() => {
       loadInitialData();
     }, [loadInitialData]);
+
+    // Auto-clear filters when switching menus
+    useEffect(() => {
+      setPageSearchTerm('');
+    }, [activeTab]);
     
     const handleLoginSuccess = useCallback((username: string, password?: string) => {
         const usernameLower = username.toLowerCase();
@@ -665,7 +669,6 @@ const App: React.FC = () => {
         case 'home': return <Dashboard user={currentUser} devices={devices} products={products} onOpenMaintenanceModal={handleOpenMaintenanceModal} onDeviceReturn={handleDeviceReturn} onOpenAddDeviceModal={() => openDetailModal(null)} onOpenEditDeviceModal={openDetailModal} onOpenAssignDeviceModal={() => setAssignWizardOpen(true)} onOpenAssignFromProductModal={setAssignFromProduct} addNotification={addNotification} t={t} searchTerm={pageSearchTerm} setSearchTerm={setPageSearchTerm} onAdminScan={() => handleOpenScanner('admin')} onBorrowRequest={handleBorrowRequest} onDeleteDevice={handleDeleteDevice} activityLogs={activityLogs} />;
         case 'services': return <ServicesPage user={currentUser} requests={serviceRequests} setRequests={setServiceRequests} t={t} addNotification={addNotification} logActivity={logActivity} sanitizeForSheet={sanitizeForSheet} />;
         case 'approvals': return <ApprovalPage devices={devices} onApproval={handleApproval} t={t} />;
-        case 'productApprovals': return currentUser.role === UserRole.Admin ? <ProductApprovalPage approvalRequests={productApprovalRequests} onApproval={handleProductApproval} t={t} /> : null;
         case 'history': return <HistoryPage history={history} devices={devices} t={t} />;
         case 'profile': return <ProfilePage user={currentUser} devices={devices} onLogout={handleLogout} setActiveTab={setActiveTab} t={t} language={language} setLanguage={setLanguage} onOpenProfilePictureModal={() => setProfilePictureModalOpen(true)} onTriggerTeacherProfilePictureUpload={handleTeacherProfilePictureUpdate} pendingApprovalsCount={devices.filter(d => d.status === DeviceStatus.PendingApproval).length} />;
         case 'userManagement': return <UserManagementPage teachers={teachers} students={students} t={t} />;
@@ -704,7 +707,10 @@ const App: React.FC = () => {
           <LandingPage 
             onLoginClick={() => setAuthModalState('login')} 
             onVisitorClick={() => setIsVisitorMode(true)} 
-            t={t} 
+            t={t}
+            devices={devices}
+            teachers={teachers}
+            students={students}
           />
         )}
 

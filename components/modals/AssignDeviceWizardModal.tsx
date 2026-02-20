@@ -27,6 +27,7 @@ const AssignDeviceWizardModal: React.FC<AssignDeviceWizardModalProps> = (props) 
   const [department, setDepartment] = useState('');
   const [grade, setGrade] = useState('');
   const [classroom, setClassroom] = useState('');
+  const [userSearchInput, setUserSearchInput] = useState(''); // New autocomplete search state
   
   // Step 4 state
   const [appleId, setAppleId] = useState('');
@@ -35,7 +36,7 @@ const AssignDeviceWizardModal: React.FC<AssignDeviceWizardModalProps> = (props) 
 
   const resetState = () => {
     setStep(1); setUserType(null); setSelectedUser(null); setSelectedDevice(null);
-    setDepartment(''); setGrade(''); setClassroom('');
+    setDepartment(''); setGrade(''); setClassroom(''); setUserSearchInput('');
     setAppleId(''); setBorrowNotes(''); setSelectedAccessory(''); setSerialNumberInput(''); setError(null);
   };
 
@@ -88,6 +89,7 @@ const AssignDeviceWizardModal: React.FC<AssignDeviceWizardModalProps> = (props) 
     if (userType === UserRole.Teacher) {
       let filtered = teachers;
       if (department) filtered = filtered.filter(t => t.department === department);
+      if (userSearchInput) filtered = filtered.filter(t => t.username.toLowerCase().includes(userSearchInput.toLowerCase()));
       return filtered;
     }
     if (userType === UserRole.Student) {
@@ -98,10 +100,11 @@ const AssignDeviceWizardModal: React.FC<AssignDeviceWizardModalProps> = (props) 
         // เรียงตามชื่อภายในห้อง
         filtered = filtered.sort((a, b) => a.username.localeCompare(b.username, 'th'));
       }
+      if (userSearchInput) filtered = filtered.filter(s => s.username.toLowerCase().includes(userSearchInput.toLowerCase()));
       return filtered;
     }
     return [];
-  }, [userType, teachers, students, department, grade, classroom]);
+  }, [userType, teachers, students, department, grade, classroom, userSearchInput]);
   
   const availableAccessories = useMemo(() => {
     if(!selectedDevice?.accessories) return [];
@@ -137,14 +140,23 @@ const AssignDeviceWizardModal: React.FC<AssignDeviceWizardModalProps> = (props) 
                 <div>
                     <h3 className="font-semibold mb-2">เลือก{userType === UserRole.Teacher ? 'ครู' : 'นักเรียน'}</h3>
                     {userType === UserRole.Teacher && (
-                        <select value={department} onChange={e => setDepartment(e.target.value)} className="w-full p-2 border rounded mb-2"><option value="">ทุกกลุ่มสาระ</option>{Object.values(TeacherDepartment).map(d => <option key={d} value={d}>{d}</option>)}</select>
+                        <select value={department} onChange={e => { setDepartment(e.target.value); setUserSearchInput(''); }} className="w-full p-2 border rounded mb-2"><option value="">ทุกกลุ่มสาระ</option>{Object.values(TeacherDepartment).map(d => <option key={d} value={d}>{d}</option>)}</select>
                     )}
                     {userType === UserRole.Student && (
                         <div className="grid grid-cols-2 gap-2 mb-2">
-                            <select value={grade} onChange={e => setGrade(e.target.value)} className="w-full p-2 border rounded"><option value="">ทุกระดับชั้น</option>{[...Array(6).keys()].map(i => <option key={i+1} value={i+1}>ม.{i+1}</option>)}</select>
-                            <select value={classroom} onChange={e => setClassroom(e.target.value)} className="w-full p-2 border rounded"><option value="">ทุกห้อง</option>{[...Array(12).keys()].map(i => <option key={i+1} value={i+1}>{i+1}</option>)}</select>
+                            <select value={grade} onChange={e => { setGrade(e.target.value); setUserSearchInput(''); }} className="w-full p-2 border rounded"><option value="">ทุกระดับชั้น</option>{[...Array(6).keys()].map(i => <option key={i+1} value={i+1}>ม.{i+1}</option>)}</select>
+                            <select value={classroom} onChange={e => { setClassroom(e.target.value); setUserSearchInput(''); }} className="w-full p-2 border rounded"><option value="">ทุกห้อง</option>{[...Array(12).keys()].map(i => <option key={i+1} value={i+1}>{i+1}</option>)}</select>
                         </div>
                     )}
+                    <div className="mb-2">
+                        <input
+                            type="text"
+                            placeholder={`ค้นหา${userType === UserRole.Teacher ? 'ครู' : 'นักเรียน'}...`}
+                            value={userSearchInput}
+                            onChange={(e) => setUserSearchInput(e.target.value)}
+                            className="w-full p-2 border rounded mb-2"
+                        />
+                    </div>
                     <select onChange={(e) => handleUserSelect(e.target.value)} defaultValue="" className="w-full p-2 border rounded">
                         <option value="" disabled>-- เลือกรายชื่อ --</option>
                         {filteredUsers.map(u => <option key={u.id} value={u.id}>{u.username}</option>)}

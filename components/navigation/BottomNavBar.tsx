@@ -50,7 +50,6 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ user, activeTab, setActiveT
         ...userNavItems.slice(0, 2),
         { id: 'approvals', icon: 'rule', label: t('approvals'), hasBadge: true, badgeCount: pendingApprovalsCount },
         { id: 'scan', icon: 'qr_code_scanner', label: 'สแกน', isCentral: true},
-        { id: 'productApprovals', icon: 'verified_user', label: 'อนุมัติสินค้า' },
         { id: 'productManagement', icon: 'inventory_2', label: t('productManagement') },
         { id: 'reports', icon: 'analytics', label: t('reports') },
         { id: 'profile', icon: 'person', label: t('profile') }

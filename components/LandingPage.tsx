@@ -81,7 +81,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick, onVisitorClick,
     <div 
       className="min-h-screen bg-spk-blue text-white font-sarabun antialiased bg-blend-multiply"
       style={{
-        backgroundImage: 'url(https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=2071&auto=format&fit=crop)',
+        backgroundImage: 'url(https://images.unsplash.com/photo-1726996278602-d02bedd6dd2c?q)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}

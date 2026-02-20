@@ -53,22 +53,30 @@ const ServicesPage: React.FC<ServicesPageProps> = ({ user, requests, setRequests
     setIsSubmitting(true);
     const newRequest = {
       id: `serv-${Date.now()}`,
-      serialNumber: serialNumber.trim(),
+      deviceId: '',
+      deviceName: 'Unknown Device',
+      deviceSerialNumber: serialNumber.trim(),
       description: description.trim(),
       repairLocation: repairLocation.trim(),
       reportedBy: user.username,
       reportedAt: new Date().toISOString(),
       status: 'Pending',
-      device: {
-        id: '',
-        name: '',
-        serialNumber: serialNumber.trim()
-      }
+      repairImageUrl: null
     };
 
-    const result = await gasHelper('create', 'Service', sanitizeForSheet(newRequest));
+    const result = await gasHelper('append', 'Service', sanitizeForSheet(newRequest));
     if (result.success) {
-      setRequests(prev => [...prev, newRequest]);
+      const newServiceRequestForState = {
+        id: newRequest.id,
+        device: { id: '', name: 'Unknown Device', serialNumber: serialNumber.trim() },
+        reportedBy: newRequest.reportedBy,
+        description: newRequest.description,
+        status: 'Pending' as 'Pending',
+        reportedAt: newRequest.reportedAt,
+        repairLocation: newRequest.repairLocation,
+        repairImageUrl: null
+      };
+      setRequests(prev => [newServiceRequestForState, ...prev]);
       setSerialNumber('');
       setDescription('');
       setRepairLocation('');

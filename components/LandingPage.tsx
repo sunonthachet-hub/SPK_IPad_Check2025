@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import type { Device, User } from '../types';
-import { UserRole, DeviceStatus } from '../types';
+import { UserRole, DeviceStatus, TeacherDepartment } from '../types';
 
 interface LandingPageProps {
   onLoginClick: () => void;
@@ -117,7 +117,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick, onVisitorClick,
           {searchMode === null && (
             <div className="mt-10 space-y-4">
               <button
-                onClick={() => setSearchMode('qr')}
+                onClick={onVisitorClick}
                 className="mt-10 bg-spk-yellow text-spk-blue font-bold py-3 px-10 rounded-full shadow-lg transform hover:scale-105 transition-transform ease-out-cubic block mx-auto"
               >
                 เริ่มต้นใช้งาน
@@ -129,16 +129,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick, onVisitorClick,
                 ค้นหาอุปกรณ์
               </button>
             </div>
-          )}
-
-          {/* QR/Serial Number Search */}
-          {searchMode === 'qr' && (
-            <button
-              onClick={onVisitorClick}
-              className="mt-10 bg-spk-yellow text-spk-blue font-bold py-3 px-10 rounded-full shadow-lg transform hover:scale-105 transition-transform ease-out-cubic"
-            >
-              เริ่มต้นใช้งาน
-            </button>
           )}
 
           {/* Device Owner Search */}
@@ -181,18 +171,18 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick, onVisitorClick,
                           className="w-full p-2 border rounded"
                         >
                           <option value="">ทุกกลุ่มสาระ</option>
-                          <option value="ภาษาไทย">ภาษาไทย</option>
-                          <option value="คณิตศาสตร์">คณิตศาสตร์</option>
-                          <option value="วิทยาศาสตร์">วิทยาศาสตร์</option>
-                          <option value="สังคมศึกษา">สังคมศึกษา</option>
-                          <option value="ภาษาอังกฤษ">ภาษาอังกฤษ</option>
-                          <option value="พลศึกษา">พลศึกษา</option>
-                          <option value="ศิลปะ">ศิลปะ</option>
-                          <option value="ดนตรี">ดนตรี</option>
-                          <option value="เทคโนโลยี">เทคโนโลยี</option>
-                          <option value="คอมพิวเตอร์">คอมพิวเตอร์</option>
-                          <option value="การงาน">การงาน</option>
-                          <option value="บัญชี">บัญชี</option>
+                          <option value={TeacherDepartment.Executive}>{TeacherDepartment.Executive}</option>
+                          <option value={TeacherDepartment.Careers}>{TeacherDepartment.Careers}</option>
+                          <option value={TeacherDepartment.Math}>{TeacherDepartment.Math}</option>
+                          <option value={TeacherDepartment.ForeignLang}>{TeacherDepartment.ForeignLang}</option>
+                          <option value={TeacherDepartment.Thai}>{TeacherDepartment.Thai}</option>
+                          <option value={TeacherDepartment.Science}>{TeacherDepartment.Science}</option>
+                          <option value={TeacherDepartment.Art}>{TeacherDepartment.Art}</option>
+                          <option value={TeacherDepartment.Social}>{TeacherDepartment.Social}</option>
+                          <option value={TeacherDepartment.Health}>{TeacherDepartment.Health}</option>
+                          <option value={TeacherDepartment.ForeignTeacher}>{TeacherDepartment.ForeignTeacher}</option>
+                          <option value={TeacherDepartment.Support}>{TeacherDepartment.Support}</option>
+                          <option value={TeacherDepartment.GovEmployee}>{TeacherDepartment.GovEmployee}</option>
                         </select>
                       </div>
                       <div>
@@ -225,20 +215,20 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick, onVisitorClick,
                           <label className="block font-semibold mb-2">เลือกชั้น</label>
                           <select
                             value={grade}
-                            onChange={(e) => { setGrade(e.target.value); setClassroom(''); setSelectedUser(''); }}
+                            onChange={(e) => { setGrade(e.target.value); setClassroom(''); setSelectedUser(''); setSearchInput(''); }}
                             className="w-full p-2 border rounded"
                           >
                             <option value="">ทุกชั้น</option>
-                            {[...Array(6).keys()].map(i => (
-                              <option key={i+1} value={i+1}>ม.{i+1}</option>
-                            ))}
+                            <option value="4">ม.4</option>
+                            <option value="5">ม.5</option>
+                            <option value="6">ม.6</option>
                           </select>
                         </div>
                         <div>
                           <label className="block font-semibold mb-2">เลือกห้อง</label>
                           <select
                             value={classroom}
-                            onChange={(e) => { setClassroom(e.target.value); setSelectedUser(''); }}
+                            onChange={(e) => { setClassroom(e.target.value); setSelectedUser(''); setSearchInput(''); }}
                             className="w-full p-2 border rounded"
                           >
                             <option value="">ทุกห้อง</option>

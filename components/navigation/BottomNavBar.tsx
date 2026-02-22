@@ -12,9 +12,9 @@ interface BottomNavBarProps {
 }
 
 const NavItem: React.FC<{ icon: string; label: string; isActive: boolean; onClick: () => void; hasBadge?: boolean; badgeCount?: number }> = ({ icon, label, isActive, onClick, hasBadge = false, badgeCount = 0 }) => (
-    <button onClick={onClick} className={`flex flex-col items-center justify-center w-full pt-2 pb-1 text-xs transition-colors duration-200 ${isActive ? 'text-spk-blue' : 'text-gray-500 hover:text-spk-blue'}`}>
+    <button title={label} aria-label={label} onClick={onClick} className={`flex flex-col items-center justify-center w-full pt-2 pb-1 text-xs transition-colors duration-200 ${isActive ? 'text-spk-blue' : 'text-gray-500 hover:text-spk-blue'}`}>
         <div className="relative">
-            <span className="material-icons-outlined text-2xl">{icon}</span>
+            <span className="material-icons-outlined text-2xl" aria-hidden>{icon}</span>
             {hasBadge && badgeCount > 0 && (
                 <span className="absolute -top-1 -right-2.5 h-5 w-5 bg-red-500 text-white text-xs font-semibold rounded-full flex items-center justify-center border-2 border-white">
                     {badgeCount}
@@ -63,9 +63,10 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ user, activeTab, setActiveT
                             <button
                                 onClick={onScanClick}
                                 className="bg-spk-blue text-white rounded-full w-16 h-16 flex items-center justify-center -mt-8 shadow-lg transform hover:scale-110 transition-transform"
-                                aria-label="Scan QR Code"
+                                aria-label={item.label}
+                                title={item.label}
                             >
-                                <span className="material-icons-outlined text-4xl">{item.icon}</span>
+                                <span className="material-icons-outlined text-4xl" aria-hidden>{item.icon}</span>
                             </button>
                         </div>
                     );

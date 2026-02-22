@@ -103,6 +103,69 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick, onVisitorClick,
     return filtered;
   }, [userType, teachers, students, department, grade, classroom, searchInput]);
 
+  const [searchType, setSearchType] = useState<'name' | 'serial'>('name');
+
+  const handleUnifiedSearch = () => {
+    setSearchError('');
+    const input = searchInput.trim();
+    if (!input) {
+      setSearchError('กรุณากรอกคำค้นหา');
+      return;
+    }
+
+    if (searchType === 'serial') {
+      const device = devices.find(d => d.serialNumber === input);
+      if (device) {
+        if (device.borrowedBy) {
+          const owner = [...teachers, ...students].find(u => u.username === device.borrowedBy || u.id === device.borrowedBy);
+          if (owner) {
+            if (userType && owner.role !== userType) {
+              setSearchError('ไม่พบเจ้าของตามประเภทที่เลือก');
+              setSearchResult(null);
+              return;
+            }
+            setSearchResult({ device, owner });
+          } else {
+            setSearchError('เครื่องนี้ได้รับการยืม แต่ไม่พบข้อมูลเจ้าของ');
+            setSearchResult(null);
+          }
+        } else {
+          setSearchError('เครื่องนี้ยังไม่ได้รับการยืม');
+          setSearchResult(null);
+        }
+      } else {
+        setSearchError('ไม่พบหมายเลขซีเรียลนี้ในระบบ');
+        setSearchResult(null);
+      }
+    } else {
+      const searchLower = input.toLowerCase();
+      const borrowedDevices = devices.filter(d => d.name?.toLowerCase().includes(searchLower) && d.borrowedBy);
+      if (borrowedDevices.length > 0) {
+        const device = borrowedDevices[0];
+        const owner = [...teachers, ...students].find(u => u.username === device.borrowedBy || u.id === device.borrowedBy);
+        if (owner) {
+          if (userType && owner.role !== userType) {
+            setSearchError('ไม่พบเจ้าของตามประเภทที่เลือก');
+            setSearchResult(null);
+            return;
+          }
+          setSearchResult({ device, owner });
+        } else {
+          setSearchError('เครื่องนี้ได้รับการยืม แต่ไม่พบข้อมูลเจ้าของ');
+          setSearchResult(null);
+        }
+      } else {
+        const availableDevices = devices.filter(d => d.name?.toLowerCase().includes(searchLower));
+        if (availableDevices.length > 0) {
+          setSearchError('ไม่พบเครื่องที่ยืมแล้ว (เครื่องนี้ยังว่าง)');
+        } else {
+          setSearchError('ไม่พบเครื่องที่มีชื่อนี้ในระบบ');
+        }
+        setSearchResult(null);
+      }
+    }
+  };
+
   const handleUserSelect = (userId: string) => {
     setSelectedUser(userId);
     const user = [...teachers, ...students].find(u => u.id === userId);
@@ -164,158 +227,106 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick, onVisitorClick,
                 เริ่มต้นใช้งาน
               </button>
               <button
-                onClick={() => setSearchMode('filter')}
+                onClick={() => setSearchMode('search')}
                 className="bg-white text-spk-blue font-bold py-3 px-10 rounded-full shadow-lg transform hover:scale-105 transition-transform block mx-auto border-2 border-spk-blue"
               >
-                ค้นหาตามชื่อผู้ใช้
-              </button>
-              <button
-                onClick={() => setSearchMode('name')}
-                className="bg-white text-spk-blue font-bold py-3 px-10 rounded-full shadow-lg transform hover:scale-105 transition-transform block mx-auto border-2 border-spk-blue"
-              >
-                ค้นหาตามชื่ออุปกรณ์
+                ค้นหา
               </button>
             </div>
           )}
 
-          {/* Device Owner Search */}
-          {searchMode === 'filter' && !searchResult && (
+          {/* Unified Search Panel */}
+          {searchMode === 'search' && !searchResult && (
             <div className="mt-10 bg-white text-spk-blue p-8 rounded-lg shadow-lg max-w-2xl">
               <button
-                onClick={() => setSearchMode(null)}
+                onClick={() => {
+                  setSearchMode(null);
+                  setSearchInput('');
+                  setSearchError('');
+                  setUserType(null);
+                }}
                 className="text-gray-500 hover:text-gray-800 text-2xl mb-4 float-right"
               >
                 ✕
               </button>
-              <h3 className="text-2xl font-bold mb-6">ค้นหาเจ้าของอุปกรณ์</h3>
+              <h3 className="text-2xl font-bold mb-6">ค้นหาอุปกรณ์ / เจ้าของ</h3>
 
-              {!userType ? (
-                <div className="flex gap-4 justify-center">
+              <div className="text-left space-y-4">
+                <div>
+                  <label className="block font-semibold mb-2">ประเภทผู้ใช้ (ไม่เลือก = ทุกคน)</label>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setUserType(UserRole.Teacher)}
+                      className={`p-3 rounded flex-1 ${userType === UserRole.Teacher ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-700'}`}
+                    >
+                      <span className="material-icons-outlined">school</span>
+                      <div className="text-sm">ครู</div>
+                    </button>
+                    <button
+                      onClick={() => setUserType(UserRole.Student)}
+                      className={`p-3 rounded flex-1 ${userType === UserRole.Student ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700'}`}
+                    >
+                      <span className="material-icons-outlined">face</span>
+                      <div className="text-sm">นักเรียน</div>
+                    </button>
+                    <button
+                      onClick={() => setUserType(null)}
+                      className={`p-3 rounded flex-1 ${userType === null ? 'bg-gray-200 text-gray-900' : 'bg-gray-100 text-gray-700'}`}
+                    >
+                      ทุกคน
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-semibold mb-2">ค้นหาโดย</label>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setSearchType('name')}
+                      className={`p-2 rounded ${searchType === 'name' ? 'bg-spk-blue text-white' : 'bg-gray-100 text-gray-700'}`}
+                    >
+                      ชื่ออุปกรณ์
+                    </button>
+                    <button
+                      onClick={() => setSearchType('serial')}
+                      className={`p-2 rounded ${searchType === 'serial' ? 'bg-spk-blue text-white' : 'bg-gray-100 text-gray-700'}`}
+                    >
+                      S/N
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-semibold mb-2">คำค้นหา</label>
+                  <input
+                    type="text"
+                    placeholder={searchType === 'serial' ? 'กรอกหมายเลขซีเรียล...' : 'กรอกชื่ออุปกรณ์...'}
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleUnifiedSearch()}
+                    className="w-full p-2 border rounded mb-3"
+                    autoFocus
+                  />
                   <button
-                    onClick={() => setUserType(UserRole.Teacher)}
-                    className="p-6 bg-blue-100 rounded-lg text-blue-800 hover:bg-blue-200 flex-1"
+                    onClick={handleUnifiedSearch}
+                    className="w-full bg-spk-blue text-white font-semibold py-2 rounded hover:bg-blue-700"
                   >
-                    <span className="material-icons-outlined block text-4xl mb-2">school</span>
-                    <p className="font-semibold">ครู</p>
-                  </button>
-                  <button
-                    onClick={() => setUserType(UserRole.Student)}
-                    className="p-6 bg-green-100 rounded-lg text-green-800 hover:bg-green-200 flex-1"
-                  >
-                    <span className="material-icons-outlined block text-4xl mb-2">face</span>
-                    <p className="font-semibold">นักเรียน</p>
+                    ค้นหา
                   </button>
                 </div>
-              ) : (
-                <div className="text-left space-y-4">
-                  {userType === UserRole.Teacher && (
-                    <>
-                      <div>
-                        <label className="block font-semibold mb-2">เลือกกลุ่มสาระ</label>
-                        <select
-                          value={department}
-                          onChange={(e) => { setDepartment(e.target.value); setSelectedUser(''); }}
-                          className="w-full p-2 border rounded"
-                        >
-                          <option value="">ทุกกลุ่มสาระ</option>
-                          <option value={TeacherDepartment.Executive}>{TeacherDepartment.Executive}</option>
-                          <option value={TeacherDepartment.Careers}>{TeacherDepartment.Careers}</option>
-                          <option value={TeacherDepartment.Math}>{TeacherDepartment.Math}</option>
-                          <option value={TeacherDepartment.ForeignLang}>{TeacherDepartment.ForeignLang}</option>
-                          <option value={TeacherDepartment.Thai}>{TeacherDepartment.Thai}</option>
-                          <option value={TeacherDepartment.Science}>{TeacherDepartment.Science}</option>
-                          <option value={TeacherDepartment.Art}>{TeacherDepartment.Art}</option>
-                          <option value={TeacherDepartment.Social}>{TeacherDepartment.Social}</option>
-                          <option value={TeacherDepartment.Health}>{TeacherDepartment.Health}</option>
-                          <option value={TeacherDepartment.ForeignTeacher}>{TeacherDepartment.ForeignTeacher}</option>
-                          <option value={TeacherDepartment.Support}>{TeacherDepartment.Support}</option>
-                          <option value={TeacherDepartment.GovEmployee}>{TeacherDepartment.GovEmployee}</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block font-semibold mb-2">ค้นหาครู</label>
-                        <input
-                          type="text"
-                          placeholder="พิมพ์ชื่อครู..."
-                          value={searchInput}
-                          onChange={(e) => setSearchInput(e.target.value)}
-                          className="w-full p-2 border rounded mb-2"
-                        />
-                        <select
-                          value={selectedUser}
-                          onChange={(e) => handleUserSelect(e.target.value)}
-                          className="w-full p-2 border rounded"
-                        >
-                          <option value="">-- เลือกครู --</option>
-                          {filteredUsers.map(u => (
-                            <option key={u.id} value={u.id}>{u.username}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </>
-                  )}
 
-                  {userType === UserRole.Student && (
-                    <>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block font-semibold mb-2">เลือกชั้น</label>
-                          <select
-                            value={grade}
-                            onChange={(e) => { setGrade(e.target.value); setClassroom(''); setSelectedUser(''); setSearchInput(''); }}
-                            className="w-full p-2 border rounded"
-                          >
-                            <option value="">ทุกชั้น</option>
-                            <option value="4">ม.4</option>
-                            <option value="5">ม.5</option>
-                            <option value="6">ม.6</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block font-semibold mb-2">เลือกห้อง</label>
-                          <select
-                            value={classroom}
-                            onChange={(e) => { setClassroom(e.target.value); setSelectedUser(''); setSearchInput(''); }}
-                            className="w-full p-2 border rounded"
-                          >
-                            <option value="">ทุกห้อง</option>
-                            {[...Array(12).keys()].map(i => (
-                              <option key={i+1} value={i+1}>{i+1}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block font-semibold mb-2">ค้นหานักเรียน</label>
-                        <input
-                          type="text"
-                          placeholder="พิมพ์ชื่อนักเรียน..."
-                          value={searchInput}
-                          onChange={(e) => setSearchInput(e.target.value)}
-                          className="w-full p-2 border rounded mb-2"
-                        />
-                        <select
-                          value={selectedUser}
-                          onChange={(e) => handleUserSelect(e.target.value)}
-                          className="w-full p-2 border rounded"
-                        >
-                          <option value="">-- เลือกนักเรียน --</option>
-                          {filteredUsers.map(u => (
-                            <option key={u.id} value={u.id}>{u.username}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </>
-                  )}
-
-                  <button
-                    onClick={() => { setUserType(null); setSearchInput(''); setSelectedUser(''); setDepartment(''); setGrade(''); setClassroom(''); }}
-                    className="w-full bg-gray-300 text-gray-800 font-semibold py-2 rounded hover:bg-gray-400"
-                  >
-                    เปลี่ยนประเภทผู้ใช้
-                  </button>
-                </div>
-              )}
+                <button
+                  onClick={() => {
+                    setSearchMode(null);
+                    setSearchInput('');
+                    setSearchError('');
+                    setUserType(null);
+                  }}
+                  className="w-full bg-gray-300 text-gray-800 font-semibold py-2 rounded hover:bg-gray-400"
+                >
+                  กลับไปหน้าหลัก
+                </button>
+              </div>
             </div>
           )}
 

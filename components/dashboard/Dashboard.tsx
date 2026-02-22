@@ -196,8 +196,8 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
             <p className="text-gray-500">สรุปภาพรวมอุปกรณ์ของโรงเรียนในวันนี้</p>
         </div>
         <div className="relative" ref={panelRef}>
-            <button onClick={handleTogglePanel} className="relative">
-              <span className="material-icons-outlined text-3xl text-gray-600 hover:text-spk-blue transition-colors">
+            <button onClick={handleTogglePanel} className="relative" title={isPanelOpen ? 'ปิดการแจ้งเตือน' : 'เปิดการแจ้งเตือน'} aria-label={isPanelOpen ? 'Hide notifications' : 'Show notifications'}>
+              <span className="material-icons-outlined text-3xl text-gray-600 hover:text-spk-blue transition-colors" aria-hidden>
                 {isPanelOpen ? 'notifications_active' : 'notifications'}
               </span>
               {hasUnread && (
@@ -228,10 +228,10 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
        {user.role === UserRole.Admin && (
             <>
                 <div className="bg-white p-3 rounded-lg shadow flex flex-wrap items-center justify-center gap-2">
-                    <button onClick={onOpenAddDeviceModal} className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors text-sm">
-                        <span className="material-icons-outlined">add_box</span>
-                        {t('addDevice')}
-                    </button>
+                  <button onClick={onOpenAddDeviceModal} className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors text-sm" title="เพิ่มอุปกรณ์ใหม่" aria-label="Add device">
+                    <span className="material-icons-outlined" aria-hidden>add_box</span>
+                    {t('addDevice')}
+                  </button>
                 </div>
                 
                 <div className="bg-white rounded-lg shadow p-4">
@@ -271,15 +271,16 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
         {user.role === UserRole.Admin && (
             <div className="space-y-4">
                 <h2 className="text-lg font-bold text-gray-700 border-b-2 border-spk-blue pb-1">อุปกรณ์ทั้งหมดในระบบ ({filteredAdminDevices.length})</h2>
-                 <div className="relative">
-                    <input
-                        type="text"
-                        placeholder="ค้นหาอุปกรณ์ (ชื่อ, S/N, ผู้ยืม, Apple ID)..."
-                        value={adminDeviceFilter}
-                        onChange={(e) => { setAdminDeviceFilter(e.target.value); setCurrentPage(1); }}
-                        className="w-full pl-10 pr-4 py-2 border rounded-lg"
-                    />
-                    <span className="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="ค้นหาอุปกรณ์ (ชื่อ, S/N, ผู้ยืม, Apple ID)..."
+                    title="ค้นหาอุปกรณ์ด้วยชื่อ, S/N, ผู้ยืม หรือ Apple ID"
+                    value={adminDeviceFilter}
+                    onChange={(e) => { setAdminDeviceFilter(e.target.value); setCurrentPage(1); }}
+                    className="w-full pl-10 pr-4 py-2 border rounded-lg"
+                  />
+                  <span className="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden>search</span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {paginatedAdminDevices.map(device => (

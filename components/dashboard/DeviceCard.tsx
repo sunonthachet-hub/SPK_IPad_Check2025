@@ -53,19 +53,19 @@ const DeviceCard: React.FC<DeviceCardProps> = (props) => {
             </div>
             
             <div className="bg-gray-50 p-2 flex justify-end items-center gap-2">
-                {isMyDevice && (
+                    {isMyDevice && (
                     <>
-                       <button onClick={() => onReturn?.(device)} className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1">
-                            <span className="material-icons-outlined text-lg">assignment_return</span> {t('return')}
+                       <button title="คืนอุปกรณ์" onClick={() => onReturn?.(device)} className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1" aria-label="Return device">
+                            <span className="material-icons-outlined text-lg" aria-hidden>assignment_return</span> {t('return')}
                         </button>
-                         <button onClick={() => onReport?.(device)} className="text-sm text-orange-600 hover:text-orange-800 flex items-center gap-1">
-                            <span className="material-icons-outlined text-lg">build</span> {t('reportIssue')}
+                         <button title="แจ้งซ่อมอุปกรณ์" onClick={() => onReport?.(device)} className="text-sm text-orange-600 hover:text-orange-800 flex items-center gap-1" aria-label="Report issue">
+                            <span className="material-icons-outlined text-lg" aria-hidden>build</span> {t('reportIssue')}
                         </button>
                     </>
                 )}
                 {canBorrow && (
-                    <button onClick={() => onBorrowRequest?.(device.id)} className="text-sm bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 flex items-center gap-1">
-                        <span className="material-icons-outlined text-lg">add_shopping_cart</span> {t('borrow')}
+                    <button title="ขอยืมอุปกรณ์" onClick={() => onBorrowRequest?.(device.id)} className="text-sm bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 flex items-center gap-1" aria-label="Borrow device">
+                        <span className="material-icons-outlined text-lg" aria-hidden>add_shopping_cart</span> {t('borrow')}
                     </button>
                 )}
                 {user?.role === UserRole.Admin && (

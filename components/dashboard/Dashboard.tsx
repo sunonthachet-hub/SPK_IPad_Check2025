@@ -12,8 +12,6 @@ interface DashboardProps {
   onDeviceReturn: (device: Device) => void;
   onOpenAddDeviceModal: () => void;
   onOpenEditDeviceModal: (device: Device) => void;
-  onOpenAssignDeviceModal: () => void;
-  onOpenAssignFromProductModal: (product: Product) => void;
   onBorrowRequest: (deviceId: string) => void;
   onDeleteDevice: (deviceId: string) => void;
   addNotification: (message: string, type: 'info' | 'success' | 'error') => void;
@@ -24,7 +22,7 @@ interface DashboardProps {
   activityLogs: ActivityLog[];
 }
 
-const ProductGroup: React.FC<{product: Product, devices: Device[], t: (key:string) => string, onOpenAssignFromProductModal: (product: Product) => void}> = ({ product, devices, t, onOpenAssignFromProductModal }) => {
+const ProductGroup: React.FC<{product: Product, devices: Device[], t: (key:string) => string}> = ({ product, devices, t }) => {
     const stats = useMemo(() => {
         const productDevices = devices.filter(d => d.productId === product.id);
         return {
@@ -42,7 +40,6 @@ const ProductGroup: React.FC<{product: Product, devices: Device[], t: (key:strin
                 <div>
                     <h3 className="text-xl font-bold text-gray-800">{product.name}</h3>
                     <p className="text-sm text-gray-500">{product.description}</p>
-                    <button onClick={() => onOpenAssignFromProductModal(product)} className="mt-2 text-sm bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">Assign User</button>
                 </div>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 text-center">
@@ -120,7 +117,7 @@ const Pagination: React.FC<{currentPage: number, totalPages: number, onPageChang
 };
 
 const Dashboard: React.FC<DashboardProps> = (props) => {
-  const { user, devices, products, t, onOpenAddDeviceModal, onOpenEditDeviceModal, onOpenAssignDeviceModal, onOpenMaintenanceModal, onDeviceReturn, onBorrowRequest, onDeleteDevice, activityLogs } = props;
+  const { user, devices, products, t, onOpenAddDeviceModal, onOpenEditDeviceModal, onOpenMaintenanceModal, onDeviceReturn, onBorrowRequest, onDeleteDevice, activityLogs } = props;
   const [adminDeviceFilter, setAdminDeviceFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const DEVICES_PER_PAGE = 9;
@@ -235,10 +232,6 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
                         <span className="material-icons-outlined">add_box</span>
                         {t('addDevice')}
                     </button>
-                    <button onClick={onOpenAssignDeviceModal} className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors text-sm">
-                        <span className="material-icons-outlined">assignment_ind</span>
-                        {t('assignUser')}
-                    </button>
                 </div>
                 
                 <div className="bg-white rounded-lg shadow p-4">
@@ -257,21 +250,21 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
         {studentProducts.length > 0 && (
             <div className="space-y-4">
                 <h2 className="text-lg font-bold text-gray-700 border-b-2 border-spk-yellow pb-1">อุปกรณ์สำหรับนักเรียน</h2>
-                {studentProducts.map(p => <ProductGroup key={p.id} product={p} devices={devices} t={t} onOpenAssignFromProductModal={onOpenAssignFromProductModal} />)}
+                {studentProducts.map(p => <ProductGroup key={p.id} product={p} devices={devices} t={t} />)}
             </div>
         )}
 
         {teacherProducts.length > 0 && (
              <div className="space-y-4">
                 <h2 className="text-lg font-bold text-gray-700 border-b-2 border-spk-yellow pb-1">อุปกรณ์สำหรับครู</h2>
-                {teacherProducts.map(p => <ProductGroup key={p.id} product={p} devices={devices} t={t} onOpenAssignFromProductModal={onOpenAssignFromProductModal} />)}
+                {teacherProducts.map(p => <ProductGroup key={p.id} product={p} devices={devices} t={t} />)}
             </div>
         )}
         
         {generalProducts.length > 0 && (
              <div className="space-y-4">
                 <h2 className="text-lg font-bold text-gray-700 border-b-2 border-spk-yellow pb-1">อุปกรณ์ทั่วไป</h2>
-                {generalProducts.map(p => <ProductGroup key={p.id} product={p} devices={devices} t={t} onOpenAssignFromProductModal={onOpenAssignFromProductModal} />)}
+                {generalProducts.map(p => <ProductGroup key={p.id} product={p} devices={devices} t={t} />)}
             </div>
         )}
         

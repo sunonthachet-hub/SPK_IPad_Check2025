@@ -16,7 +16,6 @@ import LandingPage from './components/LandingPage';
 import HistoryPage from './components/history/HistoryPage';
 import ProfilePage from './components/profile/ProfilePage';
 import ServicesPage from './components/services/ServicesPage';
-import ApprovalPage from './components/admin/ApprovalPage';
 import MaintenanceModal from './components/modals/MaintenanceModal';
 import ICloudModal from './components/modals/ICloudModal';
 import DeviceDetailModal from './components/modals/DeviceDetailModal';
@@ -29,7 +28,6 @@ import AssignFromProductModal from './components/modals/AssignFromProductModal';
 import AssignDeviceFromProductModal from './components/modals/AssignDeviceFromProductModal';
 import SuccessBorrowModal from './components/modals/SuccessBorrowModal';
 import SelectProfilePictureModal from './components/modals/SelectProfilePictureModal';
-import UserManagementPage from './components/admin/UserManagementPage';
 import ReportsPage from './components/admin/ReportsPage';
 import ProductManagementPage from './components/admin/ProductManagementPage';
 import VisitorPage from './components/visitor/VisitorPage';
@@ -455,18 +453,6 @@ const App: React.FC = () => {
         } else { addNotification(`Error updating status: ${result.error}`, 'error'); }
         setApprovalConfirmationModalOpen(false); setDeviceToApprove(null);
     };
-    
-    const handleApproval = (deviceId: string, isApproved: boolean) => {
-        if (isApproved) {
-            const device = devices.find(d => d.id === deviceId);
-            if (device) {
-              setDeviceToApprove(device);
-              setApprovalConfirmationModalOpen(true);
-            }
-        } else {
-            processApproval(deviceId, false);
-        }
-    };
 
     const handleProductApproval = async (requestId: string, isApproved: boolean, rejectReason?: string) => {
         const request = productApprovalRequests.find(r => r.id === requestId);
@@ -654,11 +640,6 @@ const App: React.FC = () => {
         else { setScannedDevice(foundDevice); setDeviceInfoModalOpen(true); }
     };
 
-    const handleScanRequest = (callback: (result: string) => void) => {
-        setScanResultHandler(() => callback);
-        setScannerOpen(true);
-    };
-
     const handleOpenScanner = (context: 'user' | 'admin') => { setScannerContext(context); setScannerOpen(true); };
     const openDetailModal = (device: Device | null) => { setDeviceToEdit(device); setDetailModalOpen(true); };
     const handleOpenMaintenanceModal = (device: Device) => { setSelectedDevice(device); setMaintenanceModalOpen(true); };
@@ -666,15 +647,13 @@ const App: React.FC = () => {
     const renderContent = () => {
       if (!currentUser) return null;
       switch (activeTab) {
-        case 'home': return <Dashboard user={currentUser} devices={devices} products={products} onOpenMaintenanceModal={handleOpenMaintenanceModal} onDeviceReturn={handleDeviceReturn} onOpenAddDeviceModal={() => openDetailModal(null)} onOpenEditDeviceModal={openDetailModal} onOpenAssignDeviceModal={() => setAssignWizardOpen(true)} onOpenAssignFromProductModal={setAssignFromProduct} addNotification={addNotification} t={t} searchTerm={pageSearchTerm} setSearchTerm={setPageSearchTerm} onAdminScan={() => handleOpenScanner('admin')} onBorrowRequest={handleBorrowRequest} onDeleteDevice={handleDeleteDevice} activityLogs={activityLogs} />;
+        case 'home': return <Dashboard user={currentUser} devices={devices} products={products} onOpenMaintenanceModal={handleOpenMaintenanceModal} onDeviceReturn={handleDeviceReturn} onOpenAddDeviceModal={() => openDetailModal(null)} onOpenEditDeviceModal={openDetailModal} addNotification={addNotification} t={t} searchTerm={pageSearchTerm} setSearchTerm={setPageSearchTerm} onAdminScan={() => handleOpenScanner('admin')} onBorrowRequest={handleBorrowRequest} onDeleteDevice={handleDeleteDevice} activityLogs={activityLogs} />;
         case 'services': return <ServicesPage user={currentUser} requests={serviceRequests} setRequests={setServiceRequests} t={t} addNotification={addNotification} logActivity={logActivity} sanitizeForSheet={sanitizeForSheet} />;
-        case 'approvals': return <ApprovalPage devices={devices} onApproval={handleApproval} t={t} />;
         case 'history': return <HistoryPage history={history} devices={devices} t={t} />;
         case 'profile': return <ProfilePage user={currentUser} devices={devices} onLogout={handleLogout} setActiveTab={setActiveTab} t={t} language={language} setLanguage={setLanguage} onOpenProfilePictureModal={() => setProfilePictureModalOpen(true)} onTriggerTeacherProfilePictureUpload={handleTeacherProfilePictureUpdate} pendingApprovalsCount={devices.filter(d => d.status === DeviceStatus.PendingApproval).length} />;
-        case 'userManagement': return <UserManagementPage teachers={teachers} students={students} t={t} />;
         case 'reports': return <ReportsPage borrowHistory={history} t={t} devices={devices} students={students} teachers={teachers} />;
         case 'productManagement': return <ProductManagementPage products={products} onEditProduct={openProductModal} onAddProduct={() => openProductModal(null)} onDeleteProduct={handleDeleteProduct} onAssignUser={(product) => { setProductForAssignment(product); setAssignDeviceFromProductModalOpen(true); }} t={t} searchTerm={pageSearchTerm} setSearchTerm={setPageSearchTerm} />;
-        default: return <Dashboard user={currentUser} devices={devices} products={products} onOpenMaintenanceModal={handleOpenMaintenanceModal} onDeviceReturn={handleDeviceReturn} onOpenAddDeviceModal={() => openDetailModal(null)} onOpenEditDeviceModal={openDetailModal} onOpenAssignDeviceModal={() => setAssignWizardOpen(true)} addNotification={addNotification} t={t} searchTerm={pageSearchTerm} setSearchTerm={setPageSearchTerm} onAdminScan={() => handleOpenScanner('admin')} onBorrowRequest={handleBorrowRequest} onDeleteDevice={handleDeleteDevice} activityLogs={activityLogs} />;
+        default: return <Dashboard user={currentUser} devices={devices} products={products} onOpenMaintenanceModal={handleOpenMaintenanceModal} onDeviceReturn={handleDeviceReturn} onOpenAddDeviceModal={() => openDetailModal(null)} onOpenEditDeviceModal={openDetailModal} addNotification={addNotification} t={t} searchTerm={pageSearchTerm} setSearchTerm={setPageSearchTerm} onAdminScan={() => handleOpenScanner('admin')} onBorrowRequest={handleBorrowRequest} onDeleteDevice={handleDeleteDevice} activityLogs={activityLogs} />;
       }
     };
 
@@ -690,7 +669,7 @@ const App: React.FC = () => {
             
             <main className="p-2 sm:p-4 lg:p-6">{renderContent()}</main>
             <Footer t={t} />
-            <BottomNavBar user={currentUser} activeTab={activeTab} setActiveTab={setActiveTab} t={t} onScanClick={() => handleOpenScanner('user')} pendingApprovalsCount={devices.filter(d => d.status === DeviceStatus.PendingApproval).length}/>
+            <BottomNavBar user={currentUser} activeTab={activeTab} setActiveTab={setActiveTab} t={t} onScanClick={() => handleOpenScanner('user')} />
           </div>
         ) : isVisitorMode ? (
             <VisitorPage

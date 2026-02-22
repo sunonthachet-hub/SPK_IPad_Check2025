@@ -9,7 +9,6 @@ interface BottomNavBarProps {
   setActiveTab: (tab: string) => void;
   t: (key: string) => string;
   onScanClick: () => void;
-  pendingApprovalsCount?: number;
 }
 
 const NavItem: React.FC<{ icon: string; label: string; isActive: boolean; onClick: () => void; hasBadge?: boolean; badgeCount?: number }> = ({ icon, label, isActive, onClick, hasBadge = false, badgeCount = 0 }) => (
@@ -26,7 +25,7 @@ const NavItem: React.FC<{ icon: string; label: string; isActive: boolean; onClic
     </button>
 );
 
-const BottomNavBar: React.FC<BottomNavBarProps> = ({ user, activeTab, setActiveTab, t, onScanClick, pendingApprovalsCount = 0 }) => {
+const BottomNavBar: React.FC<BottomNavBarProps> = ({ user, activeTab, setActiveTab, t, onScanClick }) => {
     
     // FIX: Define a type for navigation items to resolve property access errors on the union type.
     type NavItemType = {
@@ -48,9 +47,7 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ user, activeTab, setActiveT
 
     const adminNavItems: NavItemType[] = [
         ...userNavItems.slice(0, 2),
-        { id: 'approvals', icon: 'rule', label: t('approvals'), hasBadge: true, badgeCount: pendingApprovalsCount },
         { id: 'scan', icon: 'qr_code_scanner', label: 'สแกน', isCentral: true},
-        { id: 'productManagement', icon: 'inventory_2', label: t('productManagement') },
         { id: 'reports', icon: 'analytics', label: t('reports') },
         { id: 'profile', icon: 'person', label: t('profile') }
     ];

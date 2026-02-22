@@ -2,6 +2,8 @@
 import React from 'react';
 import type { User, Device } from '../../types';
 import { UserRole, DeviceStatus } from '../../types';
+import { translations } from '../../constants';
+import BorrowCountdownBadge from '../modals/BorrowCountdownBadge';
 
 interface DeviceCardProps {
   device: Device;
@@ -41,7 +43,12 @@ const DeviceCard: React.FC<DeviceCardProps> = (props) => {
                             { [DeviceStatus.Available]: 'bg-green-500', [DeviceStatus.Borrowed]: 'bg-blue-500', [DeviceStatus.Maintenance]: 'bg-orange-500', [DeviceStatus.PendingApproval]: 'bg-yellow-500 text-black', [DeviceStatus.Lost]: 'bg-red-500' }[device.status]
                         }`}>{t(device.status.toLowerCase() as keyof typeof translations.en) || device.status}</span>
                     </div>
-                    {device.status === DeviceStatus.Borrowed && <p className="text-xs mt-1 text-gray-600">Borrowed by: {device.borrowedBy}</p>}
+                    {device.status === DeviceStatus.Borrowed && (
+                        <div className="mt-2 space-y-1">
+                            <p className="text-xs text-gray-600">Borrowed by: {device.borrowedBy}</p>
+                            <BorrowCountdownBadge borrowDate={device.borrowDate} dueDate={device.dueDate} t={t} />
+                        </div>
+                    )}
                 </div>
             </div>
             
@@ -62,14 +69,16 @@ const DeviceCard: React.FC<DeviceCardProps> = (props) => {
                     </button>
                 )}
                 {user?.role === UserRole.Admin && (
-                    <div className="flex items-center gap-1 ml-auto">
+                    <div className="flex items-center gap-2 ml-auto">
                         {onEdit && (
-                            <button onClick={() => onEdit(device)} className="text-sm text-indigo-600 hover:text-indigo-800 p-1" title="Edit">
-                                <span className="material-icons-outlined text-lg">edit</span>
+                            <button onClick={() => onEdit(device)} className="text-sm bg-indigo-500 text-white px-3 py-1 rounded hover:bg-indigo-600 flex items-center gap-1" title="View Details">
+                                <span className="material-icons-outlined text-lg">info</span>
+                                {t('details') || 'Details'}
                             </button>
                         )}
-                        <button onClick={() => onDelete?.(device.id)} className="text-sm text-red-500 hover:text-red-700 p-1" title="Delete">
-                             <span className="material-icons-outlined text-lg">delete</span>
+                        <button onClick={() => onDelete?.(device.id)} className="text-sm bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 flex items-center gap-1" title="Delete">
+                            <span className="material-icons-outlined text-lg">delete</span>
+                             {t('delete') || 'Delete'}
                         </button>
                     </div>
                 )}

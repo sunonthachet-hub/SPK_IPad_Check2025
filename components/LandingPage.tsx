@@ -13,8 +13,9 @@ interface LandingPageProps {
 }
 
 const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick, onVisitorClick, t, devices, teachers, students }) => {
-  const [searchMode, setSearchMode] = useState<'qr' | 'filter' | null>(null);
+  const [searchMode, setSearchMode] = useState<'qr' | 'filter' | 'name' | null>(null);
   const [serialNumber, setSerialNumber] = useState('');
+  const [deviceNameSearch, setDeviceNameSearch] = useState('');
   const [userType, setUserType] = useState<UserRole | null>(null);
   const [department, setDepartment] = useState('');
   const [grade, setGrade] = useState('');
@@ -28,15 +29,55 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick, onVisitorClick,
     setSearchError('');
     const device = devices.find(d => d.serialNumber === serialNumber);
     if (device) {
-      const owner = [...teachers, ...students].find(u => u.id === device.borrowedBy);
-      if (owner) {
-        setSearchResult({ device, owner });
+      if (device.borrowedBy) {
+        // Search by username (device.borrowedBy contains username, not ID)
+        const owner = [...teachers, ...students].find(u => u.username === device.borrowedBy);
+        if (owner) {
+          setSearchResult({ device, owner });
+        } else {
+          setSearchError('เครื่องนี้ได้รับการยืม แต่ไม่พบข้อมูลเจ้าของ');
+          setSearchResult(null);
+        }
       } else {
-        setSearchError('ค้นหาเครื่องแล้ว แต่ยังไม่ได้มีการยืม');
+        setSearchError('เครื่องนี้ยังไม่ได้รับการยืม');
         setSearchResult(null);
       }
     } else {
       setSearchError('ไม่พบหมายเลขซีเรียลนี้ในระบบ');
+      setSearchResult(null);
+    }
+  };
+
+  const handleDeviceNameSearch = () => {
+    setSearchError('');
+    if (!deviceNameSearch.trim()) {
+      setSearchError('กรุณาพิมพ์ชื่ออุปกรณ์ที่ต้องการค้นหา');
+      return;
+    }
+
+    const searchLower = deviceNameSearch.toLowerCase();
+    const borrowedDevices = devices.filter(d => 
+      d.name?.toLowerCase().includes(searchLower) && d.borrowedBy
+    );
+
+    if (borrowedDevices.length > 0) {
+      const device = borrowedDevices[0];
+      const owner = [...teachers, ...students].find(u => u.username === device.borrowedBy);
+      if (owner) {
+        setSearchResult({ device, owner });
+      } else {
+        setSearchError('เครื่องนี้ได้รับการยืม แต่ไม่พบข้อมูลเจ้าของ');
+        setSearchResult(null);
+      }
+    } else {
+      const availableDevices = devices.filter(d => 
+        d.name?.toLowerCase().includes(searchLower)
+      );
+      if (availableDevices.length > 0) {
+        setSearchError('ไม่พบเครื่องที่ยืมแล้ว (เครื่องนี้ยังว่าง)');
+      } else {
+        setSearchError('ไม่พบเครื่องที่มีชื่อนี้ในระบบ');
+      }
       setSearchResult(null);
     }
   };
@@ -126,7 +167,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick, onVisitorClick,
                 onClick={() => setSearchMode('filter')}
                 className="bg-white text-spk-blue font-bold py-3 px-10 rounded-full shadow-lg transform hover:scale-105 transition-transform block mx-auto border-2 border-spk-blue"
               >
-                ค้นหาอุปกรณ์
+                ค้นหาตามชื่อผู้ใช้
+              </button>
+              <button
+                onClick={() => setSearchMode('name')}
+                className="bg-white text-spk-blue font-bold py-3 px-10 rounded-full shadow-lg transform hover:scale-105 transition-transform block mx-auto border-2 border-spk-blue"
+              >
+                ค้นหาตามชื่ออุปกรณ์
               </button>
             </div>
           )}
@@ -272,6 +319,53 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick, onVisitorClick,
             </div>
           )}
 
+          {/* Device Name Search */}
+          {searchMode === 'name' && !searchResult && (
+            <div className="mt-10 bg-white text-spk-blue p-8 rounded-lg shadow-lg max-w-2xl">
+              <button
+                onClick={() => {
+                  setSearchMode(null);
+                  setDeviceNameSearch('');
+                  setSearchError('');
+                }}
+                className="text-gray-500 hover:text-gray-800 text-2xl mb-4 float-right"
+              >
+                ✕
+              </button>
+              <h3 className="text-2xl font-bold mb-6">ค้นหาอุปกรณ์ตามชื่อ</h3>
+              <div className="text-left space-y-4">
+                <div>
+                  <label className="block font-semibold mb-2">ชื่ออุปกรณ์ (เช่น iPad Pro, iPad Air)</label>
+                  <input
+                    type="text"
+                    placeholder="พิมพ์ชื่ออุปกรณ์..."
+                    value={deviceNameSearch}
+                    onChange={(e) => setDeviceNameSearch(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleDeviceNameSearch()}
+                    className="w-full p-2 border rounded mb-3"
+                    autoFocus
+                  />
+                  <button
+                    onClick={handleDeviceNameSearch}
+                    className="w-full bg-spk-blue text-white font-semibold py-2 rounded hover:bg-blue-700"
+                  >
+                    ค้นหา
+                  </button>
+                </div>
+                <button
+                  onClick={() => {
+                    setSearchMode(null);
+                    setDeviceNameSearch('');
+                    setSearchError('');
+                  }}
+                  className="w-full bg-gray-300 text-gray-800 font-semibold py-2 rounded hover:bg-gray-400"
+                >
+                  กลับไปหน้าหลัก
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Search Results */}
           {searchResult && (
             <div className="mt-10 bg-white text-spk-blue p-8 rounded-lg shadow-lg max-w-2xl">
@@ -279,13 +373,18 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick, onVisitorClick,
                 onClick={() => {
                   setSearchResult(null);
                   setSearchError('');
-                  setSearchMode('filter');
-                  setUserType(null);
-                  setSearchInput('');
-                  setSelectedUser('');
-                  setDepartment('');
-                  setGrade('');
-                  setClassroom('');
+                  if (searchMode === 'name') {
+                    setSearchMode('name');
+                    setDeviceNameSearch('');
+                  } else {
+                    setSearchMode('filter');
+                    setUserType(null);
+                    setSearchInput('');
+                    setSelectedUser('');
+                    setDepartment('');
+                    setGrade('');
+                    setClassroom('');
+                  }
                 }}
                 className="text-gray-500 hover:text-gray-800 text-2xl mb-4 float-right"
               >
@@ -335,13 +434,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick, onVisitorClick,
               <button
                 onClick={() => {
                   setSearchError('');
-                  setSearchMode('filter');
-                  setUserType(null);
-                  setSearchInput('');
-                  setSelectedUser('');
-                  setDepartment('');
-                  setGrade('');
-                  setClassroom('');
+                  if (searchMode === 'name') {
+                    setDeviceNameSearch('');
+                  } else {
+                    setSearchMode('filter');
+                    setUserType(null);
+                    setSearchInput('');
+                    setSelectedUser('');
+                    setDepartment('');
+                    setGrade('');
+                    setClassroom('');
+                  }
                 }}
                 className="mt-3 text-red-600 hover:text-red-800 underline"
               >

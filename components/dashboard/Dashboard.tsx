@@ -181,6 +181,8 @@ const AdminTableView: React.FC<{devices: Device[], teachers: TeacherUser[], stud
         </div>
     );
 };
+
+const ProductGroup: React.FC<{product: Product, devices: Device[], t: (key: string) => string}> = ({ product, devices, t }) => {
     const stats = useMemo(() => {
         const productDevices = devices.filter(d => d.productId === product.id);
         return {
@@ -219,8 +221,8 @@ const AdminTableView: React.FC<{devices: Device[], teachers: TeacherUser[], stud
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
 const Pagination: React.FC<{currentPage: number, totalPages: number, onPageChange: (page: number) => void}> = ({ currentPage, totalPages, onPageChange }) => {
     const getPageNumbers = () => {

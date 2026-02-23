@@ -415,7 +415,7 @@ const App: React.FC = () => {
             const userToFind = [...teachers, ...students].find(u => u.username === device.borrowedBy);
             const userRole = userToFind ? userToFind.role : UserRole.Student;
             const dueDate = new Date(borrowDate);
-            if (userRole === UserRole.Student) { dueDate.setFullYear(dueDate.getFullYear() + 2, dueDate.getMonth() + 6); }
+            if (userRole === UserRole.Student) { dueDate.setFullYear(dueDate.getFullYear() + 3); }
             else if (userRole === UserRole.Teacher) { dueDate.setFullYear(dueDate.getFullYear() + 5); }
             
             minimalUpdate = {
@@ -503,7 +503,7 @@ const App: React.FC = () => {
     const handleAssignDevice = async ({ user, device, appleId, borrowNotes, borrowedAccessories }: { user: User; device: Device; appleId: string; borrowNotes: string, borrowedAccessories: string[] }) => {
         const borrowDate = new Date();
         const dueDate = new Date(borrowDate);
-        if (user.role === UserRole.Student) { dueDate.setFullYear(dueDate.getFullYear() + 2, dueDate.getMonth() + 6); } 
+        if (user.role === UserRole.Student) { dueDate.setFullYear(dueDate.getFullYear() + 3); } 
         else if (user.role === UserRole.Teacher) { dueDate.setFullYear(dueDate.getFullYear() + 5); }
         
         const minimalUpdate = {

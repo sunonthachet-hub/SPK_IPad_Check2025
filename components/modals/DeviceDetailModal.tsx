@@ -77,14 +77,20 @@ const DeviceDetailModal: React.FC<DeviceDetailModalProps> = ({ isOpen, onClose, 
           </div>
         </div>
         {deviceData.status === DeviceStatus.Borrowed && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t">
-                <div>
-                    <label className="block text-sm font-medium">Borrowed By</label>
-                    <input type="text" name="borrowedBy" value={deviceData.borrowedBy || ''} onChange={handleChange} className="mt-1 w-full border border-gray-300 p-2 rounded-md"/>
+            <div className="space-y-4 mt-4 pt-4 border-t">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium">Borrowed By</label>
+                        <input type="text" name="borrowedBy" value={deviceData.borrowedBy || ''} onChange={handleChange} className="mt-1 w-full border border-gray-300 p-2 rounded-md"/>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium">Apple ID</label>
+                        <input type="text" name="appleId" value={deviceData.appleId || ''} onChange={handleChange} className="mt-1 w-full border border-gray-300 p-2 rounded-md"/>
+                    </div>
                 </div>
                 <div>
-                    <label className="block text-sm font-medium">Apple ID</label>
-                    <input type="text" name="appleId" value={deviceData.appleId || ''} onChange={handleChange} className="mt-1 w-full border border-gray-300 p-2 rounded-md"/>
+                    <label className="block text-sm font-medium">Borrow Notes</label>
+                    <textarea name="borrowNotes" value={deviceData.borrowNotes || ''} onChange={handleChange} rows={3} className="mt-1 w-full border border-gray-300 p-2 rounded-md" placeholder="Additional notes about the borrowing..."/>
                 </div>
             </div>
         )}

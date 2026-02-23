@@ -22,7 +22,134 @@ interface DashboardProps {
   activityLogs: ActivityLog[];
 }
 
-const ProductGroup: React.FC<{product: Product, devices: Device[], t: (key:string) => string}> = ({ product, devices, t }) => {
+// Utility function to calculate remaining time percentage and color
+const getReturnTimeColor = (borrowDate: string | undefined, dueDate: string | undefined): { color: string; percentage: number; text: string } => {
+  if (!borrowDate || !dueDate) return { color: 'bg-gray-100', percentage: 0, text: 'N/A' };
+  
+  const now = new Date();
+  const borrow = new Date(borrowDate);
+  const due = new Date(dueDate);
+  
+  const totalMs = due.getTime() - borrow.getTime();
+  const remainingMs = due.getTime() - now.getTime();
+  
+  if (remainingMs <= 0) return { color: 'bg-red-100', percentage: 0, text: 'Overdue' };
+  
+  const percentage = (remainingMs / totalMs) * 100;
+  
+  let color = 'bg-gray-100';
+  if (percentage > 70) color = 'bg-green-100'; // 🟢 Green
+  else if (percentage > 30) color = 'bg-orange-100'; // 🟠 Orange
+  else if (percentage > 10) color = 'bg-yellow-100'; // 🟡 Yellow
+  else color = 'bg-red-100'; // 🔴 Red
+  
+  return { color, percentage: Math.round(percentage), text: `${Math.round(percentage)}%` };
+};
+
+interface DashboardProps {
+  user: User;
+  devices: Device[];
+  products: Product[];
+  onOpenMaintenanceModal: (device: Device) => void;
+  onDeviceReturn: (device: Device) => void;
+  onOpenAddDeviceModal: () => void;
+  onOpenEditDeviceModal: (device: Device) => void;
+  onBorrowRequest: (deviceId: string) => void;
+  onDeleteDevice: (deviceId: string) => void;
+  addNotification: (message: string, type: 'info' | 'success' | 'error') => void;
+  t: (key: string) => string;
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+  onAdminScan: () => void;
+  activityLogs: ActivityLog[];
+}
+
+const AdminTableView: React.FC<{devices: Device[], searchTerm: string, t: (key: string) => string, onEdit: (device: Device) => void, onReturn: (device: Device) => void, onReport: (device: Device) => void, onDelete: (deviceId: string) => void}> = ({ devices, searchTerm, t, onEdit, onReturn, onReport, onDelete }) => {
+    const filteredDevices = useMemo(() => {
+        if (!searchTerm) return devices;
+        const lower = searchTerm.toLowerCase();
+        return devices.filter(d =>
+          d.name?.toLowerCase().includes(lower) ||
+          d.serialNumber?.toLowerCase().includes(lower) ||
+          d.borrowedBy?.toLowerCase().includes(lower) ||
+          d.category?.toLowerCase().includes(lower)
+        );
+    }, [devices, searchTerm]);
+
+    const groupedDevices = useMemo(() => {
+        const groups: { [key: string]: Device[] } = {};
+        filteredDevices.forEach(device => {
+            const category = device.category || 'Others';
+            if (!groups[category]) groups[category] = [];
+            groups[category].push(device);
+        });
+        return groups;
+    }, [filteredDevices]);
+
+    return (
+        <div className="space-y-4">
+            {Object.entries(groupedDevices).map(([category, categoryDevices]) => (
+                <div key={category} className="bg-white rounded-lg shadow overflow-hidden">
+                    <div className="bg-gradient-to-r from-spk-blue to-blue-500 text-white p-3 font-semibold">
+                        {category} ({categoryDevices.length})
+                    </div>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead className="bg-gray-50 border-b">
+                                <tr>
+                                    <th className="text-left p-3">ผู้ยืม</th>
+                                    <th className="text-left p-3">รุ่น</th>
+                                    <th className="text-left p-3">S/N</th>
+                                    <th className="text-center p-3">สถานะ</th>
+                                    <th className="text-center p-3">เหลือ</th>
+                                    <th className="text-center p-3">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y">
+                                {categoryDevices.map(device => {
+                                    const { color, percentage, text } = getReturnTimeColor(device.borrowDate, device.dueDate);
+                                    return (
+                                        <tr key={device.id} className="hover:bg-gray-50">
+                                            <td className="p-3">{device.borrowedBy || '-'}</td>
+                                            <td className="p-3">{device.name || '-'}</td>
+                                            <td className="p-3 text-xs text-gray-500">{device.serialNumber || device.id}</td>
+                                            <td className="p-3 text-center">
+                                                <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
+                                                    device.status === DeviceStatus.Available ? 'bg-green-100 text-green-700' :
+                                                    device.status === DeviceStatus.Borrowed ? 'bg-blue-100 text-blue-700' :
+                                                    device.status === DeviceStatus.Maintenance ? 'bg-orange-100 text-orange-700' :
+                                                    device.status === DeviceStatus.PendingApproval ? 'bg-yellow-100 text-yellow-700' :
+                                                    'bg-red-100 text-red-700'
+                                                }`}>
+                                                    {device.status}
+                                                </span>
+                                            </td>
+                                            <td className="p-3 text-center">
+                                                {device.status === DeviceStatus.Borrowed ? (
+                                                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${color}`}>
+                                                        {text}
+                                                    </span>
+                                                ) : '-'}
+                                            </td>
+                                            <td className="p-3 text-center space-x-1">
+                                                <button onClick={() => onEdit(device)} className="text-blue-600 hover:underline" title="Edit">✏️</button>
+                                                {device.status === DeviceStatus.Borrowed && (
+                                                    <button onClick={() => onReturn(device)} className="text-orange-600 hover:underline" title="Return">🔄</button>
+                                                )}
+                                                <button onClick={() => onReport(device)} className="text-red-600 hover:underline" title="Report">📋</button>
+                                                <button onClick={() => { if (window.confirm('Delete?')) onDelete(device.id); }} className="text-red-700 hover:underline" title="Delete">🗑️</button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+};
     const stats = useMemo(() => {
         const productDevices = devices.filter(d => d.productId === product.id);
         return {
@@ -274,33 +401,23 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
                 <div className="relative">
                   <input
                     type="text"
-                    placeholder="ค้นหาอุปกรณ์ (ชื่อ, S/N, ผู้ยืม, Apple ID)..."
-                    title="ค้นหาอุปกรณ์ด้วยชื่อ, S/N, ผู้ยืม หรือ Apple ID"
+                    placeholder="ค้นหาอุปกรณ์ (ชื่อ, S/N, ผู้ยืม, Category)..."
+                    title="ค้นหาอุปกรณ์ด้วยชื่อ, S/N, ผู้ยืม หรือ Category"
                     value={adminDeviceFilter}
                     onChange={(e) => { setAdminDeviceFilter(e.target.value); setCurrentPage(1); }}
                     className="w-full pl-10 pr-4 py-2 border rounded-lg"
                   />
                   <span className="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden>search</span>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {paginatedAdminDevices.map(device => (
-                        <DeviceCard 
-                            key={device.id}
-                            device={device}
-                            user={user}
-                            t={t}
-                            onReturn={onDeviceReturn}
-                            onReport={onOpenMaintenanceModal}
-                            onBorrowRequest={onBorrowRequest}
-                            onEdit={onOpenEditDeviceModal}
-                            onDelete={onDeleteDevice}
-                            showAssetId={true}
-                        />
-                    ))}
-                </div>
-                {totalPages > 1 && (
-                    <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-                )}
+                <AdminTableView 
+                    devices={filteredAdminDevices}
+                    searchTerm={adminDeviceFilter}
+                    t={t}
+                    onEdit={onOpenEditDeviceModal}
+                    onReturn={onDeviceReturn}
+                    onReport={onOpenMaintenanceModal}
+                    onDelete={onDeleteDevice}
+                />
             </div>
         )}
     </div>

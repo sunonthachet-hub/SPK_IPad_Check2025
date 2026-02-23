@@ -1,6 +1,6 @@
 
 import React, { useMemo, useState, useEffect, useRef } from 'react';
-import type { User, Device, Product, ActivityLog } from '../../types';
+import type { User, Device, Product, ActivityLog, TeacherUser, StudentUser } from '../../types';
 import { UserRole, DeviceStatus } from '../../types';
 import DeviceCard from './DeviceCard';
 
@@ -8,6 +8,8 @@ interface DashboardProps {
   user: User;
   devices: Device[];
   products: Product[];
+  teachers: TeacherUser[];
+  students: StudentUser[];
   onOpenMaintenanceModal: (device: Device) => void;
   onDeviceReturn: (device: Device) => void;
   onOpenAddDeviceModal: () => void;
@@ -64,7 +66,7 @@ interface DashboardProps {
   activityLogs: ActivityLog[];
 }
 
-const AdminTableView: React.FC<{devices: Device[], searchTerm: string, t: (key: string) => string, onEdit: (device: Device) => void, onReturn: (device: Device) => void, onReport: (device: Device) => void, onDelete: (deviceId: string) => void}> = ({ devices, searchTerm, t, onEdit, onReturn, onReport, onDelete }) => {
+const AdminTableView: React.FC<{devices: Device[], teachers: TeacherUser[], students: StudentUser[], searchTerm: string, t: (key: string) => string, onEdit: (device: Device) => void, onReturn: (device: Device) => void, onReport: (device: Device) => void, onDelete: (deviceId: string) => void}> = ({ devices, teachers, students, searchTerm, t, onEdit, onReturn, onReport, onDelete }) => {
     const filteredDevices = useMemo(() => {
         if (!searchTerm) return devices;
         const lower = searchTerm.toLowerCase();
@@ -79,12 +81,29 @@ const AdminTableView: React.FC<{devices: Device[], searchTerm: string, t: (key: 
     const groupedDevices = useMemo(() => {
         const groups: { [key: string]: Device[] } = {};
         filteredDevices.forEach(device => {
-            const category = device.category || 'Others';
-            if (!groups[category]) groups[category] = [];
-            groups[category].push(device);
+            if (!device.borrowedBy) {
+                const category = 'ไม่ได้ยืม (Not Borrowed)';
+                if (!groups[category]) groups[category] = [];
+                groups[category].push(device);
+                return;
+            }
+            
+            // ค้นหาว่าเป็นครูหรือนักเรียน
+            const teacher = teachers.find(t => t.username === device.borrowedBy);
+            const student = students.find(s => s.username === device.borrowedBy);
+            
+            let groupKey = 'Others';
+            if (teacher) {
+                groupKey = `[ครู] ${teacher.department}`;
+            } else if (student) {
+                groupKey = `[นักเรียน] ชั้น ${student.grade}`;
+            }
+            
+            if (!groups[groupKey]) groups[groupKey] = [];
+            groups[groupKey].push(device);
         });
         return groups;
-    }, [filteredDevices]);
+    }, [filteredDevices, teachers, students]);
 
     return (
         <div className="space-y-4">
@@ -244,7 +263,7 @@ const Pagination: React.FC<{currentPage: number, totalPages: number, onPageChang
 };
 
 const Dashboard: React.FC<DashboardProps> = (props) => {
-  const { user, devices, products, t, onOpenAddDeviceModal, onOpenEditDeviceModal, onOpenMaintenanceModal, onDeviceReturn, onBorrowRequest, onDeleteDevice, activityLogs } = props;
+  const { user, devices, products, teachers, students, t, onOpenAddDeviceModal, onOpenEditDeviceModal, onOpenMaintenanceModal, onDeviceReturn, onBorrowRequest, onDeleteDevice, activityLogs } = props;
   const [adminDeviceFilter, setAdminDeviceFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const DEVICES_PER_PAGE = 9;
@@ -411,6 +430,8 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
                 </div>
                 <AdminTableView 
                     devices={filteredAdminDevices}
+                    teachers={teachers}
+                    students={students}
                     searchTerm={adminDeviceFilter}
                     t={t}
                     onEdit={onOpenEditDeviceModal}

@@ -148,8 +148,8 @@ const App: React.FC = () => {
 
           setDevices(hydratedDevices);
           setUsers([ { id: 'U001', email: 'somsri.s@spk.ac.th', role: UserRole.Teacher }, { id: 'U002', email: 'mana.r@spk.ac.th', role: UserRole.Teacher }, { id: 'U003', email: 'somchai.j@spk.ac.th', role: UserRole.Student }, { id: 'U004', email: 'somying.j@spk.ac.th', role: UserRole.Student }]);
-          setTeachers([ { id: 'T001', username: 'คุณครูสมศรี สอนดี', email: 'somsri.s@spk.ac.th', role: UserRole.Teacher, profileImageUrl: 'https://i.pravatar.cc/150?u=teacher1', department: TeacherDepartment.Science }, { id: 'T002', username: 'คุณครูมานะ เรียนเก่ง', email: 'mana.r@spk.ac.th', role: UserRole.Teacher, profileImageUrl: 'https://i.pravatar.cc/150?u=teacher2', department: TeacherDepartment.Math }]);
-          setStudents([ { id: 'S001', username: 'สมชาย ใจดี', email: 'somchai.j@spk.ac.th', role: UserRole.Student, profileImageUrl: PREDEFINED_STUDENT_PICTURES[0], studentId: '66001', grade: 6, classroom: '1' }, { id: 'S002', username: 'สมหญิง จริงใจ', email: 'somying.j@spk.ac.th', role: UserRole.Student, profileImageUrl: PREDEFINED_STUDENT_PICTURES[1], studentId: '65034', grade: 5, classroom: '3' }]);
+          setTeachers([ { id: 'T001', username: 'คุณครูสมศรี สอนดี', fullName: 'คุณครูสมศรี สอนดี', email: 'somsri.s@spk.ac.th', role: UserRole.Teacher, profileImageUrl: 'https://i.pravatar.cc/150?u=teacher1', department: TeacherDepartment.Science }, { id: 'T002', username: 'คุณครูมานะ เรียนเก่ง', fullName: 'คุณครูมานะ เรียนเก่ง', email: 'mana.r@spk.ac.th', role: UserRole.Teacher, profileImageUrl: 'https://i.pravatar.cc/150?u=teacher2', department: TeacherDepartment.Math }]);
+          setStudents([ { id: 'S001', username: 'สมชาย ใจดี', fullName: 'สมชาย ใจดี', email: 'somchai.j@spk.ac.th', role: UserRole.Student, profileImageUrl: PREDEFINED_STUDENT_PICTURES[0], studentId: '66001', grade: 6, classroom: '1' }, { id: 'S002', username: 'สมหญิง จริงใจ', fullName: 'สมหญิง จริงใจ', email: 'somying.j@spk.ac.th', role: UserRole.Student, profileImageUrl: PREDEFINED_STUDENT_PICTURES[1], studentId: '65034', grade: 5, classroom: '3' }]);
           setHistory([ { historyId: 'bh1', deviceId: 'ipad-001', borrowerName: 'สมชาย ใจดี', borrowDate: new Date('2024-05-10').toISOString(), returnDate: new Date('2024-05-17').toISOString(), status: 'Returned', appleId: 'somchai.j@icloud.com', borrowNotes: 'First time borrower', returnNotes: 'Returned in good condition', borrowedAccessories: 'Case, Stylus Pen'}]);
           setServiceRequests([]);
           setIsLoading(false);
@@ -212,7 +212,7 @@ const App: React.FC = () => {
         
         // Check if it's hardcoded admin
         if (usernameLower === 'admin' && password === 'spkadmin') {
-            setCurrentUser({ id: 'admin-user', username: 'Admin', email: 'admin@spk.ac.th', role: UserRole.Admin, profileImageUrl: 'https://images.unsplash.com/photo-1635260191916-511fa73aa2dd?q', department: TeacherDepartment.Executive });
+            setCurrentUser({ id: 'admin-user', username: 'Admin', fullName: 'Admin', email: 'admin@spk.ac.th', role: UserRole.Admin, profileImageUrl: 'https://images.unsplash.com/photo-1635260191916-511fa73aa2dd?q', department: TeacherDepartment.Executive });
             setAuthModalState('closed'); setActiveTab('home'); return;
         }
         
@@ -242,6 +242,7 @@ const App: React.FC = () => {
                     userProfile = {
                         id: foundLoginUser.id,
                         username: foundLoginUser.id,
+                        fullName: foundLoginUser.id,
                         email: foundLoginUser.email,
                         role: UserRole.Admin,
                         profileImageUrl: 'https://images.unsplash.com/photo-1635260191916-511fa73aa2dd?q',
@@ -256,6 +257,7 @@ const App: React.FC = () => {
                     userProfile = {
                         id: foundLoginUser.id,
                         username: foundLoginUser.id,
+                        fullName: foundLoginUser.id,
                         email: foundLoginUser.email || '',
                         role: UserRole.Teacher,
                         profileImageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q',
@@ -265,6 +267,7 @@ const App: React.FC = () => {
                     userProfile = {
                         id: foundLoginUser.id,
                         username: foundLoginUser.id,
+                        fullName: foundLoginUser.id,
                         email: foundLoginUser.email || '',
                         role: UserRole.Student,
                         profileImageUrl: 'https://images.unsplash.com/photo-1535713566543-0ca126c9a646?q',
@@ -276,6 +279,7 @@ const App: React.FC = () => {
                     userProfile = {
                         id: foundLoginUser.id,
                         username: foundLoginUser.id,
+                        fullName: foundLoginUser.id,
                         email: foundLoginUser.email || '',
                         role: UserRole.Admin,
                         profileImageUrl: 'https://images.unsplash.com/photo-1635260191916-511fa73aa2dd?q',

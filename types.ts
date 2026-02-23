@@ -66,6 +66,7 @@ export interface Device {
 interface BaseUser {
   id: string;
   username: string;
+  fullName: string;
   email: string;
   role: UserRole;
   profileImageUrl: string;

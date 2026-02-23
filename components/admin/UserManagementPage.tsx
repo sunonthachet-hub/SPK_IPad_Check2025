@@ -88,7 +88,7 @@ const UserManagementPage: React.FC<UserManagementPageProps> = ({ teachers, stude
                                   <div className="flex items-center">
                                       <img className="h-10 w-10 rounded-full object-cover" src={user.profileImageUrl} alt="" />
                                       <div className="ml-4">
-                                          <div className="text-sm font-medium text-gray-900">{user.username}</div>
+                                          <div className="text-sm font-medium text-gray-900">{user.fullName}</div>
                                       </div>
                                   </div>
                               </td>
@@ -104,7 +104,7 @@ const UserManagementPage: React.FC<UserManagementPageProps> = ({ teachers, stude
                      <div className="flex items-center">
                       <img className="h-10 w-10 rounded-full object-cover" src={user.profileImageUrl} alt="" />
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{user.username}</div>
+                        <div className="text-sm font-medium text-gray-900">{user.fullName}</div>
                       </div>
                     </div>
                   </td>

@@ -339,7 +339,7 @@ const AssignDeviceFromProductModal: React.FC<AssignDeviceFromProductModalProps> 
               <option value="">Select a user...</option>
               {availableUsers.map((user) => (
                 <option key={user.id} value={user.id}>
-                  {user.username} ({user.role})
+                  {user.fullName} ({user.role})
                 </option>
               ))}
             </select>

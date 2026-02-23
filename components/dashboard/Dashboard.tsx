@@ -70,13 +70,23 @@ const AdminTableView: React.FC<{devices: Device[], teachers: TeacherUser[], stud
     const filteredDevices = useMemo(() => {
         if (!searchTerm) return devices;
         const lower = searchTerm.toLowerCase();
-        return devices.filter(d =>
-          d.name?.toLowerCase().includes(lower) ||
-          d.serialNumber?.toLowerCase().includes(lower) ||
-          d.borrowedBy?.toLowerCase().includes(lower) ||
-          d.category?.toLowerCase().includes(lower)
-        );
-    }, [devices, searchTerm]);
+        return devices.filter(d => {
+          // ค้นหาตามชื่ออุปกรณ์, serial number, หรือ category
+          const basicMatch = d.name?.toLowerCase().includes(lower) ||
+            d.serialNumber?.toLowerCase().includes(lower) ||
+            d.category?.toLowerCase().includes(lower);
+          
+          if (basicMatch) return true;
+          
+          // ค้นหาตามชื่อผู้ยืม (fullName)
+          if (d.borrowedBy) {
+            const borrower = [...teachers, ...students].find(u => u.username === d.borrowedBy);
+            if (borrower && borrower.fullName?.toLowerCase().includes(lower)) return true;
+          }
+          
+          return false;
+        });
+    }, [devices, searchTerm, teachers, students]);
 
     const groupedDevices = useMemo(() => {
         const groups: { [key: string]: Device[] } = {};
@@ -127,9 +137,11 @@ const AdminTableView: React.FC<{devices: Device[], teachers: TeacherUser[], stud
                             <tbody className="divide-y">
                                 {categoryDevices.map(device => {
                                     const { color, percentage, text } = getReturnTimeColor(device.borrowDate, device.dueDate);
+                                    const borrower = device.borrowedBy ? [...teachers, ...students].find(u => u.username === device.borrowedBy) : null;
+                                    const borrowerName = borrower?.fullName || device.borrowedBy || '-';
                                     return (
                                         <tr key={device.id} className="hover:bg-gray-50">
-                                            <td className="p-3">{device.borrowedBy || '-'}</td>
+                                            <td className="p-3">{borrowerName}</td>
                                             <td className="p-3">{device.name || '-'}</td>
                                             <td className="p-3 text-xs text-gray-500">{device.serialNumber || device.id}</td>
                                             <td className="p-3 text-center">
@@ -338,7 +350,7 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
     <div className="space-y-6">
       <header className="flex justify-between items-center">
         <div>
-            <h1 className="text-2xl font-bold text-gray-800">ยินดีต้อนรับ, {user.username.split(' ')[0]}!</h1>
+            <h1 className="text-2xl font-bold text-gray-800">ยินดีต้อนรับ, {user.fullName.split(' ')[0]}!</h1>
             <p className="text-gray-500">สรุปภาพรวมอุปกรณ์ของโรงเรียนในวันนี้</p>
         </div>
         <div className="relative" ref={panelRef}>

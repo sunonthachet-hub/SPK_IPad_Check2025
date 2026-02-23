@@ -54,7 +54,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user, devices, onLogout, setA
           />
         </div>
         <div className="text-center sm:text-left">
-          <h2 className="text-2xl font-bold">{user.username}</h2>
+          <h2 className="text-2xl font-bold">{user.fullName}</h2>
           <p className="text-gray-600">{user.email}</p>
           <span className="mt-2 inline-block bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
             {user.role}
